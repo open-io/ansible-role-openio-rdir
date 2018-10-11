@@ -1,4 +1,4 @@
-# roles/ROLENAME/tasks/main.yml
+# roles/rdir/tasks/main.yml
 ---
 - name: "Include {{ ansible_distribution }} variables"
   include_vars: "{{ item }}"
@@ -33,10 +33,11 @@
     path: "{{ item }}"
   register: _dir
   with_items:
-    - "/etc/gridinit.d/{{ openio_ROLENAME_namespace }}"
-    - "{{ openio_ROLENAME_sysconfig_dir }}/ROLENAME-{{ openio_ROLENAME_serviceid }}"
-    #- "{{ openio_ROLENAME_volume }}"
-    - "/var/log/oio/sds/{{ openio_ROLENAME_namespace }}/ROLENAME-{{ openio_ROLENAME_serviceid }}"
+    - "/etc/gridinit.d/{{ openio_rdir_namespace }}"
+    - "{{ openio_rdir_sysconfig_dir }}/rdir-{{ openio_rdir_serviceid }}"
+    - "{{ openio_rdir_volume }}"
+    - "/etc/oio/sds/{{ openio_rdir_namespace }}/watch"
+    - "/var/log/oio/sds/{{ openio_rdir_namespace }}/rdir-{{ openio_rdir_serviceid }}"
 
 - name: Ensure directories exists
   file:
@@ -44,7 +45,7 @@
     state: directory
     owner: openio
     group: openio
-    mode: 0755
+    mode: 0750
     recurse: true
   with_items: "{{ _dir.results }}"
   when: not item.stat.exists
@@ -56,22 +57,24 @@
     dest: "{{ item.dest }}"
     owner: openio
     group: openio
-    mode: 0644
+    mode: 0640
   with_items:
-    - src: "ROLENAME.conf.j2"
-      dest: "{{ openio_ROLENAME_sysconfig_dir }}/\
-        ROLENAME-{{ openio_ROLENAME_serviceid }}/ROLENAME-{{ openio_ROLENAME_serviceid }}.conf"
-    - src: "gridinit_ROLENAME.conf.j2"
-      dest: "{{ openio_ROLENAME_gridinit_dir }}/{{ openio_ROLENAME_gridinit_file_prefix }}\
-        ROLENAME-{{ openio_ROLENAME_serviceid }}.conf"
-  register: _ROLENAME_conf
+    - src: "rdir.conf.j2"
+      dest: "{{ openio_rdir_sysconfig_dir }}/\
+        rdir-{{ openio_rdir_serviceid }}/rdir-{{ openio_rdir_serviceid }}.conf"
+    - src: "gridinit_rdir.conf.j2"
+      dest: "{{ openio_rdir_gridinit_dir }}/{{ openio_rdir_gridinit_file_prefix }}\
+        rdir-{{ openio_rdir_serviceid }}.conf"
+    - src: "watch-rdir.yml.j2"
+      dest: "{{ openio_rdir_sysconfig_dir }}/watch/rdir-{{ openio_rdir_serviceid }}.yml"
+  register: _rdir_conf
 
-- name: restart ROLENAME
+- name: restart rdir
   shell: |
     gridinit_cmd reload
-    gridinit_cmd restart  {{openio_ROLENAME_namespace}}-ROLENAME-{{openio_ROLENAME_serviceid}}
-  when: 
-    - _ROLENAME_conf.changed
-    - not openio_ROLENAME_provision_only
+    gridinit_cmd restart  {{openio_rdir_namespace}}-rdir-{{openio_rdir_serviceid}}
+  when:
+    - _rdir_conf.changed
+    - not openio_rdir_provision_only
   tags: configure
 ...

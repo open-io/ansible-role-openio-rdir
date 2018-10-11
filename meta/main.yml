@@ -1,7 +1,7 @@
 ---
 galaxy_info:
   author: Cedric DELGEHIER <cedric@openio.io>
-  description: PURPOSE
+  description: Install and configure rdir OpenIO
   company: OpenIO
   license: Apache
 

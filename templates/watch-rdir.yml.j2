@@ -1,0 +1,15 @@
+# {{ ansible_managed }}
+host: {{ openio_rdir_bind_address }}
+port: {{ openio_rdir_bind_port }}
+type: rdir
+{% if openio_rdir_location | ipaddr %}
+location: {{ openio_rdir_location | replace(".", "-") }}
+{% else %}
+location: {{ openio_rdir_location }}
+{% endif %}
+checks:
+  - {type: tcp}
+stats:
+  - {type: volume, path: {{ openio_rdir_volume }}}
+  - {type: http, path: /status, parser: json}
+  - {type: system}

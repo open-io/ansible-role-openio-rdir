@@ -1,70 +1,9 @@
+[![Build Status](https://travis-ci.org/open-io/ansible-role-openio-rdir.svg?branch=master)](https://travis-ci.org/open-io/ansible-role-openio-rdir)
+# Ansible role `rdir`
 
-> **Remove this part after a clone**
+An Ansible role for OpenIO rdir. Specifically, the responsibilities of this role are to:
 
-```sh
-git clone git@github.com:open-io/ansible-role-openio-skeleton.git ROLENAME
-cd ROLENAME
-grep -r -E '\b[A-Z]+\b' --exclude=LICENSE *
-find $PWD -type f -print0 | xargs -0 sed -i -e 's@ROLENAME@trueName@g'
-git remote -v
-git remote set-url origin git@github.com:open-io/ansible-role-openio-ROLENAME.git
-
-vi meta/main.yml # change purpose and tags
-vi README.md
-git worktree add docker-tests origin/docker-tests
-```
-
-It is **required** to:
-  - Change the author
-  - Choose one or many maintainers
-  - Change the purpose
-  - Change the rolename
-  - Inform the responsibilities of this role (README)
-  - Feed the `Role Variables` table (README)
-  - Add one or more examples of playbook (README)
-  - Activate tests in Travis CI
-  - Write functional tests in the branch `docker-tests`
-
-It is **recommended** to:
-  - Setup tests on your local machine (see below)
-
-> Use the following instructions to setup your testing environment
-> (make sure virtualenv2 is installed)
->
-```sh
-virtualenv2 env && source env/bin/activate
-pip install yamllint ansible-lint
-# Run tests run before each commit
-export HOOK=".git/hooks/prepare-commit-msg"
-if [ ! -f "$HOOK" ] ; then echo "#\!/bin/sh" > "$HOOK" && chmod +x "$HOOK"; fi
-cat << \EOF >> .git/hooks/prepare-commit-msg
-cmds=("ansible-lint . -x ANSIBLE0016" "yamllint -c .yamllint .")
-for cmd in "${cmds[@]}"; do
-  echo "Running ${cmd%% *}"
-  cmd_out="$($cmd)"
-  echo -n "${cmd_out}"
-  if [ "$cmd_out" ]; then
-      echo -e "\nRejecting commit: ${cmd%% *} returned errors"
-      exit 1
-  fi
-done
-EOF
-```
-
-#### `Role Variables` table
-```sh
-for i in $(grep -E "^openio_" defaults/main.yml |cut -d':' -f1| sort); do echo '|' '`'$i'`'' | `'$(grep $i defaults/main.yml|cut -d: -f2|sed -e "s/^ //")'` | ... |'; done
-```
-
------REMOVE--THE---8<-----PREVIOUS---PART------
-__
-
-[![Build Status](https://travis-ci.org/open-io/ansible-role-openio-ROLENAME.svg?branch=master)](https://travis-ci.org/open-io/ansible-role-openio-ROLENAME)
-# Ansible role `ROLENAME`
-
-An Ansible role for PURPOSE. Specifically, the responsibilities of this role are to:
-
--
+- install and configure rdir
 
 ## Requirements
 
@@ -75,7 +14,18 @@ An Ansible role for PURPOSE. Specifically, the responsibilities of this role are
 
 | Variable   | Default | Comments (type)  |
 | :---       | :---    | :---             |
-| `openio_ROLENAME_...` | `...`   | ...              |
+| `openio_rdir_bind_address` | `` | ... |
+| `openio_rdir_bind_interface` | `"ansible_default_ipv4.alias"` | ... |
+| `openio_rdir_bind_port` | `6300` | ... |
+| `openio_rdir_gridinit_dir` | `"/etc/gridinit.d/{{ openio_rdir_namespace }}"` | ... |
+| `openio_rdir_gridinit_file_prefix` | `""` | ... |
+| `openio_rdir_location` | `"{{ ansible_hostname }}.{{ openio_rdir_serviceid }}"` | ... |
+| `openio_rdir_namespace` | `"OPENIO"` | ... |
+| `openio_rdir_provision_only` | `false` | ... |
+| `openio_rdir_serviceid` | `"0"` | ... |
+| `openio_rdir_threads` | `1` | ... |
+| `openio_rdir_volume` | `"/var/lib/oio/sds/{{ openio_rdir_namespace }}/rdir-{{ openio_rdir_serviceid }}"` | ... |
+| `openio_rdir_worker` | `1` | ... |
 
 ## Dependencies
 
@@ -85,10 +35,20 @@ No dependencies.
 
 ```yaml
 - hosts: all
-  gather_facts: true
   become: true
+  vars:
+    NS: OPENIO
   roles:
-    - role: ROLENAME
+    - role: repo
+      openio_repository_products:
+        sds:
+          release: "18.04"
+    - role: namespace
+      openio_namespace_name: "{{ NS }}"
+    - role: gridinit
+      openio_gridinit_namespace: "{{ NS }}"
+    - role: role_under_test
+      openio_rdir_namespace: "{{ NS }}"
 ```
 
 
@@ -112,7 +72,3 @@ Apache License, Version 2.0
 ## Contributors
 
 - [Cedric DELGEHIER](https://github.com/cdelgehier) (maintainer)
-- [Romain ACCIARI](https://github.com/racciari) (maintainer)
-- [Vincent LEGOLL](https://github.com/vincent-legoll) (maintainer)
-- [Sebastien LAPIERRE](https://github.com/sebastienlapierre) (maintainer)
-- [Geoffrey TIEN](https://github.com/GeoffreyTien) (maintainer)

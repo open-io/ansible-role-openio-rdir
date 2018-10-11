@@ -1,6 +1,6 @@
-# roles/ROLENAME/vars/Debian.yml
+# roles/rdir/vars/Debian.yml
 # Distribution-specific variables for Ubuntu, Debian, ...
 ---
-ROLENAME_packages:
-  - openio-ROLENAME
+rdir_packages:
+  - openio-sds
 ...

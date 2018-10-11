@@ -1,8 +1,8 @@
 ---
-openio_ROLENAME_sysconfig_dir: "/etc/oio/sds/{{ openio_ROLENAME_namespace }}"
-openio_ROLENAME_servicename: "ROLENAME-{{ openio_ROLENAME_serviceid }}"
+openio_rdir_sysconfig_dir: "/etc/oio/sds/{{ openio_rdir_namespace }}"
+openio_rdir_servicename: "rdir-{{ openio_rdir_serviceid }}"
 
-openio_ROLENAME_definition_file: >
-  "{{ openio_ROLENAME_sysconfig_dir }}/
-  {{ openio_ROLENAME_servicename }}/{{ openio_ROLENAME_servicename }}.conf"
+openio_rdir_definition_file: >
+  "{{ openio_rdir_sysconfig_dir }}/
+  {{ openio_rdir_servicename }}/{{ openio_rdir_servicename }}.conf"
 ...
