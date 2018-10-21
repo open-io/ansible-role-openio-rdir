@@ -37,7 +37,6 @@
     - "{{ openio_rdir_sysconfig_dir }}/rdir-{{ openio_rdir_serviceid }}"
     - "{{ openio_rdir_volume }}"
     - "/etc/oio/sds/{{ openio_rdir_namespace }}/watch"
-    - "/var/log/oio/sds/{{ openio_rdir_namespace }}/rdir-{{ openio_rdir_serviceid }}"
 
 - name: Ensure directories exists
   file:
@@ -49,6 +48,16 @@
     recurse: true
   with_items: "{{ _dir.results }}"
   when: not item.stat.exists
+  tags: install
+
+- name: Ensure log directory
+  file:
+    path: "/var/log/oio/sds/{{ openio_rdir_namespace }}/rdir-{{ openio_rdir_serviceid }}"
+    state: directory
+    owner: "{{ syslog_user }}"
+    group: openio
+    mode: 0750
+    recurse: true
   tags: install
 
 - name: Generate configuration files
