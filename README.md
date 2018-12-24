@@ -14,18 +14,18 @@ An Ansible role for OpenIO rdir. Specifically, the responsibilities of this role
 
 | Variable   | Default | Comments (type)  |
 | :---       | :---    | :---             |
-| `openio_rdir_bind_address` | `` | ... |
-| `openio_rdir_bind_interface` | `"ansible_default_ipv4.alias"` | ... |
-| `openio_rdir_bind_port` | `6300` | ... |
-| `openio_rdir_gridinit_dir` | `"/etc/gridinit.d/{{ openio_rdir_namespace }}"` | ... |
-| `openio_rdir_gridinit_file_prefix` | `""` | ... |
-| `openio_rdir_location` | `"{{ ansible_hostname }}.{{ openio_rdir_serviceid }}"` | ... |
-| `openio_rdir_namespace` | `"OPENIO"` | ... |
-| `openio_rdir_provision_only` | `false` | ... |
-| `openio_rdir_serviceid` | `"0"` | ... |
-| `openio_rdir_threads` | `1` | ... |
-| `openio_rdir_volume` | `"/var/lib/oio/sds/{{ openio_rdir_namespace }}/rdir-{{ openio_rdir_serviceid }}"` | ... |
-| `openio_rdir_worker` | `1` | ... |
+| `openio_rdir_bind_address` | `` | Address IP to use |
+| `openio_rdir_bind_interface` | `"ansible_default_ipv4.alias"` | Interface to use |
+| `openio_rdir_bind_port` | `6300` | Listening PORT |
+| `openio_rdir_gridinit_dir` | `"/etc/gridinit.d/{{ openio_rdir_namespace }}"` | Path to copy the gridinit conf |
+| `openio_rdir_gridinit_file_prefix` | `""` | Maybe set it to {{ openio_memcached_namespace }}- for old gridinit's style |
+| `openio_rdir_location` | `"{{ ansible_hostname }}.{{ openio_rdir_serviceid }}"` | Location |
+| `openio_rdir_namespace` | `"OPENIO"` | Namespace |
+| `openio_rdir_provision_only` | `false` | Provision only without restarting services |
+| `openio_rdir_serviceid` | `"0"` | ID in gridinit |
+| `openio_rdir_threads` | `1` | Number of threads |
+| `openio_rdir_volume` | `"/var/lib/oio/sds/{{ openio_rdir_namespace }}/{{ openio_rdir_servicename }}"` | Path to store data |
+| `openio_rdir_worker` | `1` | Number of workers |
 
 ## Dependencies
 
@@ -39,15 +39,18 @@ No dependencies.
   vars:
     NS: OPENIO
   roles:
+    - role: users
     - role: repo
+      openio_repository_no_log: false
       openio_repository_products:
         sds:
-          release: "18.04"
+          release: "18.10"
     - role: namespace
       openio_namespace_name: "{{ NS }}"
     - role: gridinit
       openio_gridinit_namespace: "{{ NS }}"
-    - role: role_under_test
+      openio_gridinit_per_ns: true
+    - role: rdir
       openio_rdir_namespace: "{{ NS }}"
 ```
 
