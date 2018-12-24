@@ -1,5 +1,5 @@
 # {{ ansible_managed }}
-[Service.{{ openio_rdir_namespace }}-rdir-{{ openio_rdir_serviceid }}]
+[Service.{{ openio_rdir_namespace }}-{{ openio_rdir_servicename }}]
 command=/usr/bin/oio-rdir-server /etc/oio/sds/{{ openio_rdir_namespace }}/{{ openio_rdir_servicename }}/{{ openio_rdir_servicename }}.conf
 enabled=true
 start_at_boot=true

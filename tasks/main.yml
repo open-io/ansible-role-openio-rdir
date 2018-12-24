@@ -7,20 +7,6 @@
     - "{{ ansible_os_family }}.yml"
   tags: install
 
-- name: Create the 'openio' group
-  group:
-    name: openio
-    gid: "{{ openio_group_openio_gid | default('220')}}"
-  tags: install
-
-- name: Create the 'openio' user
-  user:
-    name: openio
-    comment: "openio account"
-    uid: "{{ openio_user_openio_uid | default('120')}}"
-    group: openio
-  tags: install
-
 - name: "Include {{ ansible_distribution }} tasks"
   include_tasks: "{{ item }}"
   with_first_found:
@@ -28,36 +14,21 @@
     - "{{ ansible_os_family }}.yml"
   tags: install
 
-- name: Test directories presence
-  stat:
-    path: "{{ item }}"
-  register: _dir
-  with_items:
-    - "/etc/gridinit.d/{{ openio_rdir_namespace }}"
-    - "{{ openio_rdir_sysconfig_dir }}/rdir-{{ openio_rdir_serviceid }}"
-    - "{{ openio_rdir_volume }}"
-    - "/etc/oio/sds/{{ openio_rdir_namespace }}/watch"
-
 - name: Ensure directories exists
   file:
-    path: "{{ item.item }}"
+    path: "{{ item.path }}"
     state: directory
-    owner: openio
-    group: openio
-    mode: 0750
-    recurse: true
-  with_items: "{{ _dir.results }}"
-  when: not item.stat.exists
-  tags: install
-
-- name: Ensure log directory
-  file:
-    path: "/var/log/oio/sds/{{ openio_rdir_namespace }}/rdir-{{ openio_rdir_serviceid }}"
-    state: directory
-    owner: "{{ syslog_user }}"
-    group: openio
-    mode: 0750
-    recurse: true
+    owner: "{{ item.owner | default('openio') }}"
+    group: "{{ item.group | default('openio') }}"
+    mode: "{{ item.mode | default(0755) }}"
+  with_items:
+    - path: "/etc/gridinit.d/{{ openio_rdir_namespace }}"
+    - path: "{{ openio_rdir_sysconfig_dir }}/{{ openio_rdir_servicename }}"
+    - path: "{{ openio_rdir_volume }}"
+    - path: "/etc/oio/sds/{{ openio_rdir_namespace }}/watch"
+    - path: "/var/log/oio/sds/{{ openio_rdir_namespace }}/{{ openio_rdir_servicename }}"
+      owner: "{{ syslog_user }}"
+      mode: "0750"
   tags: install
 
 - name: Generate configuration files
@@ -70,18 +41,18 @@
   with_items:
     - src: "rdir.conf.j2"
       dest: "{{ openio_rdir_sysconfig_dir }}/\
-        rdir-{{ openio_rdir_serviceid }}/rdir-{{ openio_rdir_serviceid }}.conf"
+        {{ openio_rdir_servicename }}/{{ openio_rdir_servicename }}.conf"
     - src: "gridinit_rdir.conf.j2"
       dest: "{{ openio_rdir_gridinit_dir }}/{{ openio_rdir_gridinit_file_prefix }}\
-        rdir-{{ openio_rdir_serviceid }}.conf"
+        {{ openio_rdir_servicename }}.conf"
     - src: "watch-rdir.yml.j2"
-      dest: "{{ openio_rdir_sysconfig_dir }}/watch/rdir-{{ openio_rdir_serviceid }}.yml"
+      dest: "{{ openio_rdir_sysconfig_dir }}/watch/{{ openio_rdir_servicename }}.yml"
   register: _rdir_conf
 
 - name: restart rdir
   shell: |
     gridinit_cmd reload
-    gridinit_cmd restart  {{openio_rdir_namespace}}-rdir-{{openio_rdir_serviceid}}
+    gridinit_cmd restart  {{ openio_rdir_namespace }}-{{ openio_rdir_servicename }}
   when:
     - _rdir_conf.changed
     - not openio_rdir_provision_only
