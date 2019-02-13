@@ -17,4 +17,9 @@ openio_rdir_location: "{{ ansible_hostname }}.{{ openio_rdir_serviceid }}"
 
 openio_rdir_worker: 1
 openio_rdir_threads: 1
+
+openio_rdir_slots:
+  "{{ [ openio_rdir_type, openio_rdir_type ~ '-' ~ openio_rdir_location.split('.')[:-2] | join('-') ] \
+  if openio_rdir_location.split('.') | length > 2 \
+  else [ openio_rdir_type ] }}"
 ...
