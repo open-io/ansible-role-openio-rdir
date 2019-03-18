@@ -14,12 +14,12 @@ An Ansible role for OpenIO rdir. Specifically, the responsibilities of this role
 
 | Variable   | Default | Comments (type)  |
 | :---       | :---    | :---             |
-| `openio_rdir_bind_address` | `` | Address IP to use |
+| `openio_rdir_bind_address` | `openio_bind_address | default(hostvars[inventory_hostname]['ansible_' + openio_rdir_bind_interface]['ipv4']['address'])` | Address IP to use |
 | `openio_rdir_bind_interface` | `"ansible_default_ipv4.alias"` | Interface to use |
 | `openio_rdir_bind_port` | `6300` | Listening PORT |
 | `openio_rdir_gridinit_dir` | `"/etc/gridinit.d/{{ openio_rdir_namespace }}"` | Path to copy the gridinit conf |
 | `openio_rdir_gridinit_file_prefix` | `""` | Maybe set it to {{ openio_memcached_namespace }}- for old gridinit's style |
-| `openio_rdir_location` | `"{{ ansible_hostname }}.{{ openio_rdir_serviceid }}"` | Location |
+| `openio_rdir_location` | `"{{ openio_location_room | default ('') }}{{ openio_location_rack | default ('') }}{{ openio_location_server | default (ansible_hostname ~ '.') }}{{ openio_rdir_serviceid }}"` | Location |
 | `openio_rdir_namespace` | `"OPENIO"` | Namespace |
 | `openio_rdir_provision_only` | `false` | Provision only without restarting services |
 | `openio_rdir_serviceid` | `"0"` | ID in gridinit |
