@@ -1,6 +1,6 @@
 # roles/rdir/defaults/main.yml
 ---
-openio_rdir_namespace: "OPENIO"
+openio_rdir_namespace: "{{ namespace | default('OPENIO') }}"
 openio_rdir_serviceid: "0"
 
 openio_rdir_gridinit_dir: "/etc/gridinit.d/{{ openio_rdir_namespace }}"
@@ -8,13 +8,14 @@ openio_rdir_gridinit_file_prefix: ""
 
 openio_rdir_bind_interface: "{{ ansible_default_ipv4.alias }}"
 openio_rdir_bind_address:
-  "{{ hostvars[inventory_hostname]['ansible_' + openio_rdir_bind_interface]['ipv4']['address'] }}"
+  "{{ openio_bind_address \
+  | default(hostvars[inventory_hostname]['ansible_' + openio_rdir_bind_interface]['ipv4']['address']) }}"
 openio_rdir_bind_port: 6300
 
 openio_rdir_volume: "/var/lib/oio/sds/{{ openio_rdir_namespace }}/{{ openio_rdir_servicename }}"
 openio_rdir_provision_only: false
-openio_rdir_location: "{{ ansible_hostname }}.{{ openio_rdir_serviceid }}"
-
+openio_rdir_location: "{{ openio_location_room | default ('') }}{{ openio_location_rack | default ('') }}\
+  {{ openio_location_server | default (ansible_hostname ~ '.') }}{{ openio_rdir_serviceid }}"
 openio_rdir_worker: 1
 openio_rdir_threads: 1
 
