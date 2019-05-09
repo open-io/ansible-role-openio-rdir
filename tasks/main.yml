@@ -49,12 +49,37 @@
       dest: "{{ openio_rdir_sysconfig_dir }}/watch/{{ openio_rdir_servicename }}.yml"
   register: _rdir_conf
 
-- name: restart rdir
+- name: "restart rdir to apply the new configuration"
   shell: |
     gridinit_cmd reload
     gridinit_cmd restart  {{ openio_rdir_namespace }}-{{ openio_rdir_servicename }}
+  register: _restart_rdir
   when:
-    - _rdir_conf.changed
+    - _rdir_conf is changed
     - not openio_rdir_provision_only
   tags: configure
+
+- block:
+    - name: "Ensure rdir is started"
+      command: gridinit_cmd start {{ openio_rdir_namespace }}-{{ openio_rdir_servicename }}
+      register: _start_rdir
+      changed_when: '"Success" in _start_rdir.stdout'
+      when:
+        - not openio_rdir_provision_only
+        - _restart_rdir is skipped
+      tags: configure
+
+    - name: check rdir
+      uri:
+        url: "http://{{ openio_rdir_bind_address }}:{{ openio_rdir_bind_port }}/status"
+        return_content: true
+        status_code: 200
+      register: _rdir_check
+      retries: 3
+      delay: 5
+      until: _rdir_check is success
+      changed_when: false
+      when:
+        - not openio_rdir_provision_only
+  when: openio_bootstrap | d(false)
 ...
