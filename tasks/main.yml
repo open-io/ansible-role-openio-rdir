@@ -5,7 +5,9 @@
   with_first_found:
     - "{{ ansible_distribution }}.yml"
     - "{{ ansible_os_family }}.yml"
-  tags: install
+  tags:
+    - install
+    - configure
 
 - name: "Include {{ ansible_distribution }} tasks"
   include_tasks: "{{ item }}"
@@ -29,7 +31,7 @@
     - path: "/var/log/oio/sds/{{ openio_rdir_namespace }}/{{ openio_rdir_servicename }}"
       owner: "{{ syslog_user }}"
       mode: "0750"
-  tags: install
+  tags: configure
 
 - name: Generate configuration files
   template:
@@ -48,6 +50,7 @@
     - src: "watch-rdir.yml.j2"
       dest: "{{ openio_rdir_sysconfig_dir }}/watch/{{ openio_rdir_servicename }}.yml"
   register: _rdir_conf
+  tags: configure
 
 - name: "restart rdir to apply the new configuration"
   shell: |
@@ -79,6 +82,7 @@
       delay: 5
       until: _rdir_check is success
       changed_when: false
+      tags: configure
       when:
         - not openio_rdir_provision_only
   when: openio_bootstrap | d(false)
