@@ -78,8 +78,8 @@
         return_content: true
         status_code: 200
       register: _rdir_check
-      retries: 3
-      delay: 5
+      retries: 30
+      delay: 0.5
       until: _rdir_check is success
       changed_when: false
       tags: configure
