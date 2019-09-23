@@ -14,6 +14,7 @@ openio_rdir_bind_port: 6300
 
 openio_rdir_volume: "/var/lib/oio/sds/{{ openio_rdir_namespace }}/{{ openio_rdir_servicename }}"
 openio_rdir_provision_only: false
+openio_rdir_package_upgrade: "{{ openio_package_upgrade | d(false) }}"
 openio_rdir_location: "{{ openio_location_room | default ('') }}{{ openio_location_rack | default ('') }}\
   {{ openio_location_server | default (ansible_hostname ~ '.') }}{{ openio_rdir_serviceid }}"
 openio_rdir_worker: 1
