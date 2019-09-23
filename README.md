@@ -27,6 +27,7 @@ An Ansible role for OpenIO rdir. Specifically, the responsibilities of this role
 | `openio_rdir_threads` | `1` | Number of threads |
 | `openio_rdir_volume` | `"/var/lib/oio/sds/{{ openio_rdir_namespace }}/{{ openio_rdir_servicename }}"` | Path to store data |
 | `openio_rdir_worker` | `1` | Number of workers |
+| `openio_rdir_package_upgrade` | `false` | Set the packages to the latest version (to be set in extra_vars) |
 
 ## Dependencies
 
