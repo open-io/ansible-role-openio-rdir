@@ -24,4 +24,6 @@ openio_rdir_slots:
   "{{ [ openio_rdir_type, openio_rdir_type ~ '-' ~ openio_rdir_location.split('.')[:-2] | join('-') ] \
   if openio_rdir_location.split('.') | length > 2 \
   else [ openio_rdir_type ] }}"
+
+openio_rdir_state: present
 ...

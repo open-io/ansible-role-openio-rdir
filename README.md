@@ -24,6 +24,7 @@ An Ansible role for OpenIO rdir. Specifically, the responsibilities of this role
 | `openio_rdir_provision_only` | `false` | Provision only without restarting services |
 | `openio_rdir_serviceid` | `"0"` | ID in gridinit |
 | `openio_rdir_slots` | `[rdir]` | The service's slot in conscience |
+| `openio_rdir_state` | `present` | If `absent` the configuration will be removed and service will be stop |
 | `openio_rdir_threads` | `1` | Number of threads |
 | `openio_rdir_volume` | `"/var/lib/oio/sds/{{ openio_rdir_namespace }}/{{ openio_rdir_servicename }}"` | Path to store data |
 | `openio_rdir_worker` | `1` | Number of workers |

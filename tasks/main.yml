@@ -49,16 +49,43 @@
         {{ openio_rdir_servicename }}.conf"
     - src: "watch-rdir.yml.j2"
       dest: "{{ openio_rdir_sysconfig_dir }}/watch/{{ openio_rdir_servicename }}.yml"
-  register: _rdir_conf
+  register: _rdir_conf_present
   tags: configure
+  when: openio_rdir_state == 'present'
 
-- name: "restart rdir to apply the new configuration"
-  shell: |
-    gridinit_cmd reload
-    gridinit_cmd restart  {{ openio_rdir_namespace }}-{{ openio_rdir_servicename }}
-  register: _restart_rdir
+- name: Generate configuration files
+  file:
+    dest: "{{ item.dest }}"
+    state: "{{ openio_rdir_state }}"
+  with_items:
+    - dest: "{{ openio_rdir_sysconfig_dir }}/\
+        {{ openio_rdir_servicename }}/{{ openio_rdir_servicename }}.conf"
+    - dest: "{{ openio_rdir_gridinit_dir }}/{{ openio_rdir_gridinit_file_prefix }}\
+        {{ openio_rdir_servicename }}.conf"
+    - dest: "{{ openio_rdir_sysconfig_dir }}/watch/{{ openio_rdir_servicename }}.yml"
+  register: _rdir_conf_absent
+  tags: configure
+  when: openio_rdir_state == 'absent'
+
+- block:
+    - name: "stop rdir to apply the new configuration"
+      shell: gridinit_cmd stop  {{ openio_rdir_namespace }}-{{ openio_rdir_servicename }}
+      when:
+        - _rdir_conf_absent is changed
+        - openio_rdir_state == 'absent'
+
+    - name: "reload gridinit to apply the new configuration"
+      shell: gridinit_cmd reload
+      when:
+        - _rdir_conf_present is changed or _rdir_conf_absent is changed
+
+    - name: "restart rdir to apply the new configuration"
+      shell: gridinit_cmd restart  {{ openio_rdir_namespace }}-{{ openio_rdir_servicename }}
+      register: _restart_rdir
+      when:
+        - _rdir_conf_present is changed
+        - openio_rdir_state == 'present'
   when:
-    - _rdir_conf is changed
     - not openio_rdir_provision_only
   tags: configure
 
@@ -69,6 +96,7 @@
       changed_when: '"Success" in _start_rdir.stdout'
       when:
         - not openio_rdir_provision_only
+        - openio_rdir_state == 'present'
         - _restart_rdir is skipped
       tags: configure
 
@@ -85,5 +113,6 @@
       tags: configure
       when:
         - not openio_rdir_provision_only
+        - openio_rdir_state == 'present'
   when: openio_bootstrap | d(false)
 ...
