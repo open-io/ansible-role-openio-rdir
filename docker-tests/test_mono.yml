@@ -1,0 +1,36 @@
+# Test playbook
+---
+- hosts: all
+  become: true
+  vars:
+    NS: TRAVIS
+    openio_bootstrap: true
+  roles:
+    - role: users
+    - role: repository
+      openio_repository_no_log: false
+      openio_repository_mirror_host: mirror2.openio.io
+    - role: gridinit
+      openio_gridinit_namespace: "{{ NS }}"
+      openio_gridinit_per_ns: true
+    - role: namespace
+      openio_namespace_name: "{{ NS }}"
+    - role: role_under_test
+      openio_rdir_namespace: "{{ NS }}"
+      openio_rdir_serviceid: "5"
+      openio_rdir_bind_port: 6301
+      openio_rdir_volume: "/var/lib/oio/sds/{{ openio_rdir_namespace }}/am"
+      openio_rdir_state: "present"
+    - role: role_under_test
+      openio_rdir_namespace: "{{ NS }}"
+      openio_rdir_serviceid: "2"
+      openio_rdir_bind_port: 6302
+      openio_rdir_volume: "/var/lib/oio/sds/{{ openio_rdir_namespace }}/stram"
+      openio_rdir_state: "absent"
+    - role: role_under_test
+      openio_rdir_namespace: "{{ NS }}"
+      openio_rdir_serviceid: "3"
+      openio_rdir_bind_port: 6303
+      openio_rdir_volume: "/var/lib/oio/sds/{{ openio_rdir_namespace }}/gram"
+      openio_rdir_state: "offline"
+...

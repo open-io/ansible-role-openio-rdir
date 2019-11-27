@@ -6,7 +6,7 @@
 # Tests
 
 @test 'Status' {
-  run bash -c "curl http://${SUT_IP}:6300/status"
+  run bash -c "curl http://${SUT_IP}:6301/status"
   echo "output: "$output
   echo "status: "$status
   [[ "${status}" -eq "0" ]]
@@ -14,7 +14,7 @@
 }
 
 @test 'Config' {
-  run bash -c "curl http://${SUT_IP}:6300/config"
+  run bash -c "curl http://${SUT_IP}:6301/config"
   echo "output: "$output
   echo "status: "$status
   [[ "${status}" -eq "0" ]]
