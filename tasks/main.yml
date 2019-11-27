@@ -16,65 +16,61 @@
     - "{{ ansible_os_family }}.yml"
   tags: install
 
-- name: Ensure directories exists
-  file:
-    path: "{{ item.path }}"
-    state: directory
-    owner: "{{ item.owner | default('openio') }}"
-    group: "{{ item.group | default('openio') }}"
-    mode: "{{ item.mode | default(0755) }}"
-  with_items:
-    - path: "/etc/gridinit.d/{{ openio_rdir_namespace }}"
-    - path: "{{ openio_rdir_sysconfig_dir }}/{{ openio_rdir_servicename }}"
-    - path: "{{ openio_rdir_volume }}"
-    - path: "/etc/oio/sds/{{ openio_rdir_namespace }}/watch"
-    - path: "/var/log/oio/sds/{{ openio_rdir_namespace }}/{{ openio_rdir_servicename }}"
-      owner: "{{ syslog_user }}"
-      mode: "0750"
-  tags: configure
+- name: Set properties
+  set_fact:
+    _rdir:
+      volume: "{{ item.1.volume }}"  # mandatory
+      name: "{{ openio_rdir_type }}-{{ item.1.id | default(item.0) }}"  # calculated
+      id: "{{ item.1.id | default(item.0) }}"  # mandatory
+      port: "{{ item.1.port }}"  # mandatory
+      state: "{{ item.1.state | d('present') }}"
+  with_indexed_items: "{{ openio_rdir_instances }}"
+  register: _rdir_properties
 
-- name: Generate configuration files
-  template:
-    src: "{{ item.src }}"
-    dest: "{{ item.dest }}"
+- name: Ensure namespace directories exist
+  file:
+    path: "{{ item }}"
+    state: directory
     owner: openio
     group: openio
-    mode: 0640
+    mode: "0755"
   with_items:
-    - src: "rdir.conf.j2"
-      dest: "{{ openio_rdir_sysconfig_dir }}/\
-        {{ openio_rdir_servicename }}/{{ openio_rdir_servicename }}.conf"
-    - src: "gridinit_rdir.conf.j2"
-      dest: "{{ openio_rdir_gridinit_dir }}/{{ openio_rdir_gridinit_file_prefix }}\
-        {{ openio_rdir_servicename }}.conf"
-    - src: "watch-rdir.yml.j2"
-      dest: "{{ openio_rdir_sysconfig_dir }}/watch/{{ openio_rdir_servicename }}.yml"
-  register: _rdir_conf
+    - "/etc/gridinit.d/{{ openio_rdir_namespace }}"
+    - "/etc/oio/sds/{{ openio_rdir_namespace }}/watch"
   tags: configure
 
-- name: "restart rdir to apply the new configuration"
-  shell: |
-    gridinit_cmd reload
-    gridinit_cmd restart  {{ openio_rdir_namespace }}-{{ openio_rdir_servicename }}
-  register: _restart_rdir
+- name: "Include tasks for rdir state"
+  include_tasks: "{{ rd.ansible_facts._rdir.state }}.yml"
+  tags: configure
+  with_items: "{{ _rdir_properties.results }}"
+  loop_control:
+    loop_var: rd
+
+- name: "Reload gridinit to apply the new configuration"
+  shell: gridinit_cmd reload
   when:
+    - not openio_rdir_provision_only
+    - need_reload | default(false)
+
+- name: "restart rdir to apply the new configuration"
+  shell: gridinit_cmd restart  {{ openio_rdir_namespace }}-{{ openio_rdir_servicename }}
+  with_items: "{{ _rdir_properties.results }}"
+  when:
+    - item.ansible_facts._rdir.state == "present"
     - _rdir_conf is changed
     - not openio_rdir_provision_only
-  tags: configure
 
 - block:
     - name: "Ensure rdir is started"
-      command: gridinit_cmd start {{ openio_rdir_namespace }}-{{ openio_rdir_servicename }}
+      command: gridinit_cmd start {{ openio_rdir_namespace }}-{{ item.ansible_facts._rdir.name }}
       register: _start_rdir
       changed_when: '"Success" in _start_rdir.stdout'
-      when:
-        - not openio_rdir_provision_only
-        - _restart_rdir is skipped
-      tags: configure
+      when: item.ansible_facts._rdir.state == "present"
+      with_items: "{{ _rdir_properties.results }}"
 
     - name: check rdir
       uri:
-        url: "http://{{ openio_rdir_bind_address }}:{{ openio_rdir_bind_port }}/status"
+        url: "http://{{ openio_rdir_bind_address }}:{{ item.ansible_facts._rdir.port }}/status"
         return_content: true
         status_code: 200
       register: _rdir_check
@@ -82,8 +78,10 @@
       delay: 1
       until: _rdir_check is success
       changed_when: false
-      tags: configure
-      when:
-        - not openio_rdir_provision_only
-  when: openio_bootstrap | d(false)
+      with_items: "{{ _rdir_properties.results }}"
+      when: item.ansible_facts._rdir.state == "present"
+  tags: configure
+  when:
+    - not openio_rdir_provision_only
+    - openio_bootstrap | d(false)
 ...

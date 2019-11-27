@@ -1,0 +1,51 @@
+# roles/rdir/tasks/present.yml
+---
+
+- name: present - Reset defaults
+  set_fact:
+    openio_rdir_servicename: "{{ rd.ansible_facts._rdir.name }}"
+    openio_rdir_bind_port: "{{ rd.ansible_facts._rdir.port }}"
+    openio_rdir_serviceid: "{{ rd.ansible_facts._rdir.id }}"
+    openio_rdir_volume: "{{ rd.ansible_facts._rdir.volume }}"
+    openio_rdir_state: "{{ rd.ansible_facts._rdir.state }}"
+
+- name: present - Ensure directories exists
+  file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: "{{ item.owner | default('openio') }}"
+    group: "{{ item.group | default('openio') }}"
+    mode: "{{ item.mode | default(0755) }}"
+  with_items:
+    - path: "{{ openio_rdir_volume }}"
+    - path: "{{ openio_rdir_sysconfig_dir }}/{{ openio_rdir_servicename }}"
+    - path: "/var/log/oio/sds/{{ openio_rdir_namespace }}/{{ openio_rdir_servicename }}"
+      owner: "{{ syslog_user }}"
+      mode: "0750"
+
+- name: present - Generate configuration files
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: openio
+    group: openio
+    mode: 0640
+  with_items:
+    - src: "rdir.conf.j2"
+      dest: "{{ openio_rdir_sysconfig_dir }}/\
+        {{ openio_rdir_servicename }}/{{ openio_rdir_servicename }}.conf"
+    - src: "gridinit_rdir.conf.j2"
+      dest: "{{ openio_rdir_gridinit_dir }}/{{ openio_rdir_gridinit_file_prefix }}\
+        {{ openio_rdir_servicename }}.conf"
+    - src: "watch-rdir.yml.j2"
+      dest: "{{ openio_rdir_sysconfig_dir }}/watch/{{ openio_rdir_servicename }}.yml"
+  register: _rdir_conf
+
+- block:
+    - name: present - Set properties
+      set_fact:
+        need_reload: true
+  when:
+    - _rdir_conf is changed
+    - not openio_rdir_provision_only
+...

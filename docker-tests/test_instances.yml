@@ -17,4 +17,17 @@
       openio_namespace_name: "{{ NS }}"
     - role: role_under_test
       openio_rdir_namespace: "{{ NS }}"
+      openio_rdir_instances:
+        - id: "5"
+          port: 6301
+          state: "present"
+          volume: "/var/lib/oio/sds/{{ openio_rdir_namespace }}/am"
+        - id: "2"
+          port: 6302
+          state: "absent"
+          volume: "/var/lib/oio/sds/{{ openio_rdir_namespace }}/stram"
+        - id: "3"
+          port: 6303
+          state: "offline"
+          volume: "/var/lib/oio/sds/{{ openio_rdir_namespace }}/gram"
 ...
