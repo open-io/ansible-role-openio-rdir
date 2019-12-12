@@ -8,6 +8,9 @@
     openio_rdir_serviceid: "{{ rd.ansible_facts._rdir.id }}"
     openio_rdir_volume: "{{ rd.ansible_facts._rdir.volume }}"
     openio_rdir_state: "{{ rd.ansible_facts._rdir.state }}"
+  tags:
+    - install
+    - configure
 
 - name: present - Ensure directories exists
   file:
@@ -22,6 +25,7 @@
     - path: "/var/log/oio/sds/{{ openio_rdir_namespace }}/{{ openio_rdir_servicename }}"
       owner: "{{ syslog_user }}"
       mode: "0750"
+  tags: install
 
 - name: present - Generate configuration files
   template:
@@ -40,6 +44,7 @@
     - src: "watch-rdir.yml.j2"
       dest: "{{ openio_rdir_sysconfig_dir }}/watch/{{ openio_rdir_servicename }}.yml"
   register: _rdir_conf
+  tags: configure
 
 - block:
     - name: present - Set properties
@@ -48,4 +53,5 @@
   when:
     - _rdir_conf is changed
     - not openio_rdir_provision_only
+  tags: configure
 ...

@@ -26,6 +26,9 @@
       state: "{{ item.1.state | d('present') }}"
   with_indexed_items: "{{ openio_rdir_instances }}"
   register: _rdir_properties
+  tags:
+    - install
+    - configure
 
 - name: Ensure namespace directories exist
   file:
@@ -41,19 +44,23 @@
 
 - name: "Include tasks for rdir state"
   include_tasks: "{{ rd.ansible_facts._rdir.state }}.yml"
-  tags: configure
+  tags:
+    - install
+    - configure
   with_items: "{{ _rdir_properties.results }}"
   loop_control:
     loop_var: rd
 
 - name: "Reload gridinit to apply the new configuration"
   shell: gridinit_cmd reload
+  tags: configure
   when:
     - not openio_rdir_provision_only
     - need_reload | default(false)
 
 - name: "restart rdir to apply the new configuration"
   shell: gridinit_cmd restart  {{ openio_rdir_namespace }}-{{ openio_rdir_servicename }}
+  tags: configure
   with_items: "{{ _rdir_properties.results }}"
   when:
     - item.ansible_facts._rdir.state == "present"

@@ -6,7 +6,9 @@
     openio_rdir_bind_port: "{{ rd.ansible_facts._rdir.port }}"
     openio_rdir_serviceid: "{{ rd.ansible_facts._rdir.id }}"
     openio_rdir_volume: "{{ rd.ansible_facts._rdir.volume }}"
-
+  tags:
+    - install
+    - configure
 
 - name: absent - Remove configuration files
   file:
@@ -19,6 +21,7 @@
         {{ openio_rdir_servicename }}.conf"
     - dest: "{{ openio_rdir_sysconfig_dir }}/watch/{{ openio_rdir_servicename }}.yml"
   register: _rdir_conf
+  tags: configure
 
 - block:
     - name: absent - stop rdir to apply the new configuration
@@ -30,5 +33,5 @@
   when:
     - _rdir_conf is changed
     - not openio_rdir_provision_only
-
+  tags: configure
 ...
