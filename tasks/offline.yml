@@ -7,8 +7,11 @@
     openio_rdir_serviceid: "{{ rd.ansible_facts._rdir.id }}"
     openio_rdir_volume: "{{ rd.ansible_facts._rdir.volume }}"
     openio_rdir_state: "{{ rd.ansible_facts._rdir.state }}"
+  tags:
+    - install
+    - configure
 
-- name: offline -Generate configuration files
+- name: offline - Generate configuration files
   template:
     src: "{{ item.src }}"
     dest: "{{ item.dest }}"
@@ -20,6 +23,7 @@
       dest: "{{ openio_rdir_gridinit_dir }}/{{ openio_rdir_gridinit_file_prefix }}\
         {{ openio_rdir_servicename }}.conf"
   register: _rdir_conf
+  tags: configure
 
 - block:
     - name: offline - stop rdir to apply the new configuration
@@ -31,4 +35,5 @@
   when:
     - _rdir_conf is changed
     - not openio_rdir_provision_only
+  tags: configure
 ...
