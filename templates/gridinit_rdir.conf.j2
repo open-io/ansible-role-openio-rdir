@@ -1,6 +1,6 @@
 # {{ ansible_managed }}
 [Service.{{ openio_rdir_namespace }}-{{ openio_rdir_servicename }}]
-command=/usr/bin/oio-rdir-server /etc/oio/sds/{{ openio_rdir_namespace }}/{{ openio_rdir_servicename }}/{{ openio_rdir_servicename }}.conf
+command=/usr/bin/oio-rdir-server {{ openio_rdir_sysconfig_dir }}/{{ openio_rdir_servicename }}/{{ openio_rdir_servicename }}.conf
 enabled={{ 'false' if openio_rdir_state == 'offline' else 'true' }}
 start_at_boot=true
 on_die=respawn
