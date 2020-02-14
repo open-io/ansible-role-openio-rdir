@@ -1,4 +1,3 @@
-# roles/rdir/defaults/main.yml
 ---
 openio_rdir_namespace: "{{ namespace | default('OPENIO') }}"
 openio_rdir_serviceid: "0"
@@ -32,4 +31,12 @@ openio_rdir_instances:
     port: "{{ openio_rdir_bind_port }}"
     volume: "{{ openio_rdir_volume }}"
     state: "{{ openio_rdir_state }}"
+
+openio_rdir_sysconfig_dir: "/etc/oio/sds/{{ openio_rdir_namespace }}"
+openio_rdir_servicename: "rdir-{{ openio_rdir_serviceid }}"
+openio_rdir_type: rdir
+
+openio_rdir_definition_file: >
+  "{{ openio_rdir_sysconfig_dir }}/
+  {{ openio_rdir_servicename }}/{{ openio_rdir_servicename }}.conf"
 ...
