@@ -59,7 +59,7 @@
     - need_reload | default(false)
 
 - name: "restart rdir to apply the new configuration"
-  shell: gridinit_cmd restart  {{ openio_rdir_namespace }}-{{ openio_rdir_servicename }}
+  command: "gridinit_cmd restart  {{ openio_rdir_namespace }}-{{ item.ansible_facts._rdir.name }}"
   tags: configure
   with_items: "{{ _rdir_properties.results }}"
   when:
@@ -69,7 +69,7 @@
 
 - block:
     - name: "Ensure rdir is started"
-      command: gridinit_cmd start {{ openio_rdir_namespace }}-{{ item.ansible_facts._rdir.name }}
+      command: "gridinit_cmd start {{ openio_rdir_namespace }}-{{ item.ansible_facts._rdir.name }}"
       register: _start_rdir
       changed_when: '"Success" in _start_rdir.stdout'
       when: item.ansible_facts._rdir.state == "present"

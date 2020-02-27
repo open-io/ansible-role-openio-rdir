@@ -2,11 +2,11 @@
 ---
 - name: offline - Reset defaults
   set_fact:
-    openio_rdir_servicename: "{{ rd.ansible_facts._rdir.name }}"
-    openio_rdir_bind_port: "{{ rd.ansible_facts._rdir.port }}"
-    openio_rdir_serviceid: "{{ rd.ansible_facts._rdir.id }}"
-    openio_rdir_volume: "{{ rd.ansible_facts._rdir.volume }}"
-    openio_rdir_state: "{{ rd.ansible_facts._rdir.state }}"
+    _openio_rdir_servicename: "{{ rd.ansible_facts._rdir.name }}"
+    _openio_rdir_bind_port: "{{ rd.ansible_facts._rdir.port }}"
+    _openio_rdir_serviceid: "{{ rd.ansible_facts._rdir.id }}"
+    _openio_rdir_volume: "{{ rd.ansible_facts._rdir.volume }}"
+    _openio_rdir_state: "{{ rd.ansible_facts._rdir.state }}"
   tags:
     - install
     - configure
@@ -21,13 +21,13 @@
   with_items:
     - src: "gridinit_rdir.conf.j2"
       dest: "{{ openio_rdir_gridinit_dir }}/{{ openio_rdir_gridinit_file_prefix }}\
-        {{ openio_rdir_servicename }}.conf"
+        {{ _openio_rdir_servicename }}.conf"
   register: _rdir_conf
   tags: configure
 
 - block:
     - name: offline - stop rdir to apply the new configuration
-      shell: gridinit_cmd stop  {{ openio_rdir_namespace }}-{{ openio_rdir_servicename }}
+      shell: gridinit_cmd stop  {{ openio_rdir_namespace }}-{{ _openio_rdir_servicename }}
 
     - name: offline - Set properties
       set_fact:
