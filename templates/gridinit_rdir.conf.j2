@@ -1,10 +1,10 @@
 # {{ ansible_managed }}
-[Service.{{ openio_rdir_namespace }}-{{ openio_rdir_servicename }}]
-command=/usr/bin/oio-rdir-server {{ openio_rdir_sysconfig_dir }}/{{ openio_rdir_servicename }}/{{ openio_rdir_servicename }}.conf
-enabled={{ 'false' if openio_rdir_state == 'offline' else 'true' }}
+[Service.{{ openio_rdir_namespace }}-{{ _openio_rdir_servicename }}]
+command=/usr/bin/oio-rdir-server {{ openio_rdir_sysconfig_dir }}/{{ _openio_rdir_servicename }}/{{ _openio_rdir_servicename }}.conf
+enabled={{ 'false' if _openio_rdir_state == 'offline' else 'true' }}
 start_at_boot=true
 on_die=respawn
-group={{ openio_rdir_namespace }},rdir,{{ openio_rdir_serviceid }}
+group={{ openio_rdir_namespace }},rdir,{{ _openio_rdir_serviceid }}
 uid=openio
 gid=openio
 env.PATH=/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin

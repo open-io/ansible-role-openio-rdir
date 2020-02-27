@@ -1,14 +1,14 @@
 # {{ ansible_managed }}
 [rdir-server]
 bind_addr = {{ openio_rdir_bind_address }}
-bind_port = {{ openio_rdir_bind_port }}
+bind_port = {{ _openio_rdir_bind_port }}
 namespace = {{ openio_rdir_namespace }}
 # Currently, only 1 worker is allowed to avoid concurrent access to leveldb database
 workers = {{ openio_rdir_worker }}
 worker_class = sync
 threads = {{ openio_rdir_threads }}
-db_path = {{ openio_rdir_volume }}
+db_path = {{ _openio_rdir_volume }}
 log_facility = LOG_LOCAL0
 log_level = info
 log_address = /dev/log
-syslog_prefix = OIO,{{ openio_rdir_namespace }},rdir,{{ openio_rdir_serviceid }}
+syslog_prefix = OIO,{{ openio_rdir_namespace }},rdir,{{ _openio_rdir_serviceid }}

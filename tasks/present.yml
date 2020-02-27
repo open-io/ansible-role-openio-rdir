@@ -3,11 +3,13 @@
 
 - name: present - Reset defaults
   set_fact:
-    openio_rdir_servicename: "{{ rd.ansible_facts._rdir.name }}"
-    openio_rdir_bind_port: "{{ rd.ansible_facts._rdir.port }}"
-    openio_rdir_serviceid: "{{ rd.ansible_facts._rdir.id }}"
-    openio_rdir_volume: "{{ rd.ansible_facts._rdir.volume }}"
-    openio_rdir_state: "{{ rd.ansible_facts._rdir.state }}"
+    _openio_rdir_servicename: "{{ rd.ansible_facts._rdir.name }}"
+    _openio_rdir_bind_port: "{{ rd.ansible_facts._rdir.port }}"
+    _openio_rdir_serviceid: "{{ rd.ansible_facts._rdir.id }}"
+    _openio_rdir_volume: "{{ rd.ansible_facts._rdir.volume }}"
+    _openio_rdir_state: "{{ rd.ansible_facts._rdir.state }}"
+    _openio_rdir_location: "{{ openio_location_room | default ('') }}{{ openio_location_rack | default ('') }}\
+  {{ openio_location_server | default (ansible_hostname ~ '.') }}{{ rd.ansible_facts._rdir.id }}"
   tags:
     - install
     - configure
@@ -20,9 +22,9 @@
     group: "{{ item.group | default('openio') }}"
     mode: "{{ item.mode | default(0755) }}"
   with_items:
-    - path: "{{ openio_rdir_volume }}"
-    - path: "{{ openio_rdir_sysconfig_dir }}/{{ openio_rdir_servicename }}"
-    - path: "/var/log/oio/sds/{{ openio_rdir_namespace }}/{{ openio_rdir_servicename }}"
+    - path: "{{ _openio_rdir_volume }}"
+    - path: "{{ openio_rdir_sysconfig_dir }}/{{ _openio_rdir_servicename }}"
+    - path: "/var/log/oio/sds/{{ openio_rdir_namespace }}/{{ _openio_rdir_servicename }}"
       owner: "{{ syslog_user }}"
       mode: "0750"
   tags: install
@@ -37,12 +39,12 @@
   with_items:
     - src: "rdir.conf.j2"
       dest: "{{ openio_rdir_sysconfig_dir }}/\
-        {{ openio_rdir_servicename }}/{{ openio_rdir_servicename }}.conf"
+        {{ _openio_rdir_servicename }}/{{ _openio_rdir_servicename }}.conf"
     - src: "gridinit_rdir.conf.j2"
       dest: "{{ openio_rdir_gridinit_dir }}/{{ openio_rdir_gridinit_file_prefix }}\
-        {{ openio_rdir_servicename }}.conf"
+        {{ _openio_rdir_servicename }}.conf"
     - src: "watch-rdir.yml.j2"
-      dest: "{{ openio_rdir_sysconfig_dir }}/watch/{{ openio_rdir_servicename }}.yml"
+      dest: "{{ openio_rdir_sysconfig_dir }}/watch/{{ _openio_rdir_servicename }}.yml"
   register: _rdir_conf
   tags: configure
 
