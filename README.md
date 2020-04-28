@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/open-io/ansible-role-openio-rdir.svg?branch=master)](https://travis-ci.org/open-io/ansible-role-openio-rdir)
+[![Build Status](https://travis-ci.org/open-io/ansible-role-openio-rdir.svg?branch=20.04)](https://travis-ci.org/open-io/ansible-role-openio-rdir)
 # Ansible role `rdir`
 
 An Ansible role for OpenIO rdir. Specifically, the responsibilities of this role are to:
